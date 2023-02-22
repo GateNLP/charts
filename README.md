@@ -1,2 +1,21 @@
-# charts
-Helm charts to install GATE applications on Kubernetes
+# Helm charts for GateNLP applications
+
+This repository holds Helm charts designed to install open-source GATE applications in a Kubernetes cluster.  The charts in this repository are deployed to the GATE Helm repository and can be installed using standard Helm commands.  To register the GATE repository with your Helm client run:
+
+```
+helm repo add gate https://repo.gate.ac.uk/repository/charts
+helm repo update
+```
+
+With the repository registered, you can then install any chart using the normal
+
+```
+helm upgrade --install {release-name} gate/{chart-name} --values {override-values.yaml} --namespace {namespace}
+```
+
+The basic command above will install the latest available version of the selected chart, or you can specify a specific version or series using the `--version` option - Helm chart version numbers are required to follow [semantic versioning](https://semver.org) rules so the version number of the _chart_ will generally be different from the version number of the _application_ that the chart installs.  See the README file in the relevant chart directory in this repository for details of exactly which app version is installed by which chart version.
+
+
+## Licensing
+
+The charts in this repository are licensed under the Apache Licence version 2.0, however the software that they install may be under one or more different and more restrictive licences.  For example the `gate-teamware` chart installs [GATE Teamware](https://github.com/GateNLP/gate-teamware), which is released under the AGPL, and [PostgreSQL](https://www.postgresql.org), which is released under its own BSD-like licence.  It is your responsibility to ensure that your use of any of these charts complies with all applicable licences.

@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # Host name under which the app will be exposed by the ingress
-hostName: "example.gate.ac.uk"
+hostName: "teamware.example.com"
 
 # Public base URL of the app - by default https://{hostName} but may need to be
 # overridden if your ingress is not tls-enabled or if it is listening on a port

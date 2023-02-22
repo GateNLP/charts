@@ -13,7 +13,7 @@ With the repository registered, you can then install any chart using the normal
 helm upgrade --install {release-name} gate/{chart-name} --values {override-values.yaml} --namespace {namespace}
 ```
 
-The basic command above will install the latest available version of the selected chart, or you can specify a specific version or series using the `--version` option - Helm chart version numbers are required to follow [semantic versioning](https://semver.org) rules so the version number of the _chart_ will generally be different from the version number of the _application_ that the chart installs.  See the README file in the relevant chart directory in this repository for details of exactly which app version is installed by which chart version.
+The basic command above will install the latest available version of the selected chart, or you can specify a specific version or series using the `--version` option.  Helm chart version numbers are required to follow [semantic versioning](https://semver.org) rules so the version number of the _chart_ will generally be different from the version number of the _application_ that the chart installs.  See the README file in the relevant chart directory in this repository for details of exactly which app version is installed by which chart version.  Semver rules require that the major version number of the chart must change with any backwards-incompatible change to the chart templates, even if the new templates are still installing the same version of the underlying software.
 
 
 ## Licensing

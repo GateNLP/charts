@@ -1,0 +1,345 @@
+# Default values for gate-teamware.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Host name under which the app will be exposed by the ingress
+hostName: "example.gate.ac.uk"
+
+# Public base URL of the app - by default https://{hostName} but may need to be
+# overridden if your ingress is not tls-enabled or if it is listening on a port
+# other than 443
+publicUrl: ""
+
+superuser:
+  # Email address for the default superuser account.  This account is created
+  # by the migration job only in the case where there are no superuser accounts
+  # already in the database
+  email: teamware-admin@example.com
+  # Username for the default superuser
+  username: admin
+  # Initial password for the default superuser, ignored if existingSecret is set
+  password: "admin"
+  # Name of an existing secret containing the initial superuser password as the
+  # "password" key.
+  existingSecret: ""
+
+# Docker registry prefix from which the backend and staticFiles images will be
+# pulled - if specified, this value _must_ end with a forward slash, e.g.
+# imageRegistry: "ghcr.io/gatenlp/"
+imageRegistry: ""
+
+migrations:
+  # Whether to run a job at chart install time to perform the Django migrations -
+  # this needs to be set to true on the first install, but could be changed to
+  # false for subsequent ones if there are no DB changes.  We deliberately do not
+  # run migrations as part of the regular Django startup as this is dangerous
+  # when there may be more than one replica of the backend pod.
+  run: false
+  ttl: 300
+
+  waitFor:
+    registry: "ghcr.io/patrickdappollonio/"
+    image: "wait-for"
+    tag: "latest"
+    timeout: "30s"
+
+backend:
+  image:
+    # Image for the backend (prefixed with imageRegistry)
+    repository: teamware-backend
+    # imagePullPolicy for the backend image
+    pullPolicy: IfNotPresent
+    # array of imagePullSecrets, if the imageRegistry requires authentication
+    # and the relevant secrets are not already provisioned to the service
+    # account
+    pullSecrets: []
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  # Number of replicas for the backend deployment, if autoscaling is not
+  # enabled
+  replicaCount: 1
+
+  # Name of an existing secret in the target namespace with a key "secret-key"
+  # containing the random secret key used by django to encrypt things like
+  # session tokens.  This *must* be set, and the secret *must* exist before
+  # this chart can be installed
+  djangoSecret: ""
+  service:
+    # Service type for the backend - normally ClusterIP if the app is being
+    # exposed via an ingress controller, but you may need to set it to
+    # NodePort or LoadBalancer if you are using an externally configured
+    # gateway.
+    type: ClusterIP
+    # Port number for the backend service
+    port: 80
+  # Kubernetes resource specification (limits/requests for cpu/memory) for
+  # the backend container.
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    # Should we scale the backend deployment using an HPA?  If true, backend.replicaCount
+    # will be ignored
+    enabled: false
+    # Minimum number of backend replicas for the HPA
+    minReplicas: 1
+    # Maximum number of backend replicas for the HPA
+    maxReplicas: 100
+    # Target utilization percentage for the HPA
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Hook to specify a standard nodeSelector for the backend pods
+  nodeSelector: {}
+
+  # Hook to specify tolerations for the backend pods
+  tolerations: []
+
+  # Hook to specify affinity/antiAffinity rules for the backend pods. 
+  affinity: {}
+  # If running with multiple replicas it is a good idea to set soft
+  # anti-affinity rules to avoid all the pods clustering on one node:
+  #  
+  #  podAntiAffinity:
+  #    preferredDuringSchedulingIgnoredDuringExecution:
+  #    - weight: 100
+  #      podAffinityTerm:
+  #        labelSelector:
+  #          matchExpressions:
+  #          - key: app.kubernetes.io/name
+  #            operator: In
+  #            values:
+  #            - gate-teamware
+  #          - key: app.kubernetes.io/instance
+  #            operator: In
+  #            values:
+  #            - {your-helm-release-name-here}
+  #          - key: app.kubernetes.io/component
+  #            operator: In
+  #            values:
+  #            - backend
+  #        topologyKey: kubernetes.io/hostname
+
+  # Annotations to apply to the backend pods
+  podAnnotations: {}
+
+  # Security context to apply to the backend pods
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  # extra environment variable settings to be passed to the django container
+  extraEnv: []
+  # extra command line arguments to be passed to the django container
+  extraArgs: []
+
+  # Container security context for the django container
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+
+staticFiles:
+  image:
+    # Image for the static files container (prefixed with imageRegistry)
+    repository: teamware-static
+    # imagePullPolicy for the static files image
+    pullPolicy: IfNotPresent
+    # array of imagePullSecrets, if the imageRegistry requires authentication
+    # and the relevant secrets are not already provisioned to the service
+    # account
+    pullSecrets: []
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  # Number of replicas for the static files deployment, if autoscaling is not
+  # enabled
+  replicaCount: 1
+  service:
+    # Service type for the static file server - normally ClusterIP if the app is being
+    # exposed via an ingress controller, but you may need to set it to
+    # NodePort or LoadBalancer if you are using an externally configured
+    # gateway.
+    type: ClusterIP
+    # Port number for the static files service
+    port: 80
+  # Kubernetes resource specification (limits/requests for cpu/memory) for
+  # the static files container.
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # Port on which to serve the nginx health check endpoint, so as not to clutter
+  # the main app access logs with frequent health checks
+  healthPort: 8888
+
+  autoscaling:
+    # Should we scale the static files deployment using an HPA?  If true, staticFiles.replicaCount
+    # will be ignored
+    enabled: false
+    # Minimum number of static files replicas for the HPA
+    minReplicas: 1
+    # Maximum number of static files replicas for the HPA
+    maxReplicas: 100
+    # Target utilization percentage for the HPA
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Hook to specify a standard nodeSelector for the static files pods
+  nodeSelector: {}
+
+  # Hook to specify tolerations for the static files pods
+  tolerations: []
+
+  # Hook to specify affinity/antiAffinity rules for the static files pods. 
+  affinity: {}
+
+  # Annotations to apply to the static files pods
+  podAnnotations: {}
+
+  # Security context to apply to the static files pods
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  # Container security context for the nginx container
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+# Set to override the name of the chart, which is used to form various other
+# resource names, labels, etc.
+nameOverride: ""
+# Set to override the full name of the app, which defaults to
+# {releasename}-{chartname}, or just {releasename} if the release name includes
+# the chart name anyway.
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+
+ingress:
+  # Ingress class name.  If unset the cluster must have a default ingress class.
+  className: ""
+  # Annotations to add to the ingress, e.g. to instruct cert-manager to issue a
+  # certificate
+  annotations: {}
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Should the ingress be TLS-enabled (exposing the app as https://)
+    enabled: true
+    # Name of the secret containing the TLS certificate.  If unset, no secretName
+    # will be set on the ingress - whether this is valid depends on the ingress
+    # controller, e.g. ingress-nginx will use the controller's default certificate,
+    # which must be valid for the relevant public host name.
+    secret: ""
+
+email:
+  # Admin email address, used as the "from" address on automated emails
+  adminAddress: ""
+  # "smtp" for SMTP(S) sender, "gmail" for GMail API.  Blank will disable email
+  # sending entirely but this is not recommended
+  backend: ""
+  # Should we require activation of new accounts with an emailed token, to
+  # verify the email address?
+  activationEnabled: false
+  smtp:
+    # Mail server host name for SMTP sender
+    host: ""
+    # Port number, typically 25 or 587 for SMTP with STARTTLS, or 465 for the
+    # older "SSL" (i.e. immediate TLS-on-connect) mechanism
+    port: "587"
+    # username, if SMTP server requires authentication
+    user: ""
+    # kubernetes secret containing the SMTP password as the "password" key
+    passwordSecret: ""
+    # SMTP security, if required - "TLS" for STARTTLS (typically on port 25 or
+    # 587), "SSL" for TLS-on-connect (typically port 465)
+    security: ""
+    # Name of a TLS secret containing the client key and certificate, if
+    # required
+    clientCertSecret: ""
+  gmail:
+    # OAuth client ID for the GMail API
+    clientId: ""
+    # Name of a Kubernetes secret with keys "client-secret" for the OAuth
+    # client secret and "refresh-token" for the GMail API refresh token.
+    secretName: ""
+
+# Database settings - see the bitnami postgresql chart documentation for full
+# details
+postgresql:
+  architecture: standalone
+  auth:
+    database: teamware_db
+    username: gate
+    existingSecret: postgres-credentials
+
+  # Additional useful settings include persistence.storageClass and persistence.size
+
+# Configure regular database backups to S3 (or compatible) storage
+backup:
+  # Image for the backup cronjob
+  image: "schickling/postgres-backup-s3:latest"
+  # Pull policy for the backup image
+  pullPolicy: Always
+  # API endpoint, if not the public Amazon S3
+  endpoint: ""
+  # S3 region e.g. us-east-1
+  region: ""
+  # Bucket to which the backups should be stored
+  bucketName: ""
+  # common key prefix for all the backups
+  keyPrefix: ""
+  # Kubernetes secret with keys "access-key-id" and "secret-key" that have
+  # write access to the specified bucket
+  credentialsSecret: ""
+
+  concurrencyPolicy: ""
+  failedJobsHistoryLimit: ""
+  successfulJobsHistoryLimit: ""
+
+  # Backup schedule.  Keys in the map are the name of the backup schedule
+  # (e.g. daily, weekly), values are the cron expression defining the schedule.
+  # The actual backup files will be placed at
+  # s3://<bucketName>/<keyPrefix>/<schedule-name>/<database-name>_<timestamp>.sql.gz
+  #
+  # Note that the cron job creates new backups but does not expire old ones -
+  # if you want old backups to expire (or be moved to cheaper storage like
+  # infrequent access or Glacier) then you should configure that at the bucket
+  # level using S3 lifecycle rules.
+  schedule: {}
+  # daily:   "13 01 * * *"
+  # weekly:  "13 02 * * 0"
+  # monthly: "13 00 1 * *"

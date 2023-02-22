@@ -72,6 +72,12 @@ backend:
     type: ClusterIP
     # Port number for the backend service
     port: 80
+    # Fixed NodePort if publishing as a NodePort service
+    nodePort: ""
+    # Additional annotations to add to the service (e.g. for a load balancer or
+    # service mesh)
+    annotations: {}
+
   # Kubernetes resource specification (limits/requests for cpu/memory) for
   # the backend container.
   resources: {}
@@ -175,6 +181,12 @@ staticFiles:
     type: ClusterIP
     # Port number for the static files service
     port: 80
+    # Fixed NodePort if publishing as a NodePort service
+    nodePort: ""
+    # Additional annotations to add to the service (e.g. for a load balancer or
+    # service mesh)
+    annotations: {}
+
   # Kubernetes resource specification (limits/requests for cpu/memory) for
   # the static files container.
   resources: {}

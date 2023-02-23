@@ -62,6 +62,9 @@ jobs:
 
       - name: Version has changed for ${{ matrix.chart }}
         run: |
+          # Fetch latest commit of main so we have a base to compare to
+          git fetch --deepen=1 origin +refs/heads/main:refs/remotes/origin/main
+
           if (
             echo "old:"
             git show origin/main:${{ matrix.chart }}/Chart.yaml | sed 's/^/  /'

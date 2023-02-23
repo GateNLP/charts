@@ -88,3 +88,30 @@ jobs:
 
           helm dependency build
           helm package .
+
+  # Final job to summarize the matrix, so it can be used in branch protection rules
+  charts-ok:
+    runs-on: ubuntu-latest
+    needs: check-chart
+    if: always()
+    
+    steps:
+      - name: Some chart failed
+        if: needs.check-chart.result == 'failure'
+        run: |
+          echo "One or more charts failed validation"
+          exit 1
+
+      - name: Chck was cancelled
+        if: needs.check-chart.result == 'cancelled'
+        run: |
+          echo "Chart validation was cancelled"
+          exit 1
+
+      - name: All charts OK
+        if: needs.check-chart.result == 'success'
+        run: echo "All charts are OK"
+
+      - name: No charts were modified
+        if: needs.check-chart.result == 'skipped'
+        run: echo "No charts were modified by this PR"

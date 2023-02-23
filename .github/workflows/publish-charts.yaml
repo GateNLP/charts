@@ -13,17 +13,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Find modified charts
-        id: changed-charts
+      - name: Find modified folders
+        id: changed-dirs
         uses: tj-actions/changed-files@v35
         with:
           dir_names: "true"
           dir_names_exclude_root: "true"
           dir_names_max_depth: "1"
-          json: "true"
+
+      - name: Filter for just modified charts
+        id: changed-charts
+        run: |
+          echo "Changed directories: ${{ steps.changed-dirs.outputs.all_changed_files }}"
+
+          (
+            echo -n 'matrix='
+            for dir in ${{ steps.changed-dirs.outputs.all_changed_files }} ; do
+              [ -f $dir/Chart.yaml ] && echo "$dir"
+            done | jq -nRc '[inputs | select(length>0)]'
+          ) >> $GITHUB_OUTPUT
+
 
     outputs:
-      changed-charts: ${{ steps.changed-charts.outputs.all_changed_files }}
+      changed-charts: ${{ steps.changed-charts.outputs.matrix }}
   
 
   publish-chart:
@@ -31,7 +43,7 @@ jobs:
     needs: find-charts
     strategy:
       matrix:
-        chart: ${{ fromJSON(needs.find-charts.outputs.changed-charts || '[]') }}
+        chart: ${{ fromJSON(needs.find-charts.outputs.changed-charts) }}
 
     steps:
       - name: Checkout

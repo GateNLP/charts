@@ -1,0 +1,56 @@
+name: Publish updated charts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  find-charts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Find modified charts
+        id: changed-charts
+        uses: tj-actions/changed-files@v35
+        with:
+          dir_names: "true"
+          dir_names_exclude_root: "true"
+          dir_names_max_depth: "1"
+          json: "true"
+
+    outputs:
+      changed-charts: ${{ steps.changed-charts.outputs.all_changed_files }}
+  
+
+  publish-chart:
+    runs-on: ubuntu-latest
+    needs: find-charts
+    strategy:
+      matrix:
+        chart: ${{ fromJSON(needs.find-charts.outputs.changed-charts) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Publish chart to GATE repository
+        run: |
+          set -e
+          cd ${{ matrix.chart }}
+          # Add repositories specified in the lock file, so helm dependency build can work
+          if [ -f "./Chart.lock" ]; then
+            yq --indent 0 '.dependencies | map(["helm", "repo", "add", .name, .repository] | join(" ")) | .[]' "./Chart.lock"  | sh --;
+          fi
+
+          # Fetch dependency charts
+          helm dependency build
+
+          # Build the tgz package
+          helm package
+
+          # Upload it to GATE repo
+          curl -u '${{ secrets.GATE_REPO_USERNAME }}:${{ secrets.GATE_REPO_PASSWORD }}' https://repo.gate.ac.uk/repository/charts/ --upload-file ${{ matrix.chart }}-*.tgz

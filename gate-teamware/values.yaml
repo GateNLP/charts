@@ -33,7 +33,7 @@ migrations:
   # false for subsequent ones if there are no DB changes.  We deliberately do not
   # run migrations as part of the regular Django startup as this is dangerous
   # when there may be more than one replica of the backend pod.
-  run: false
+  run: true
   ttl: 300
 
   waitFor:

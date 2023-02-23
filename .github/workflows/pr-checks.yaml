@@ -87,4 +87,4 @@ jobs:
           fi
 
           helm dependency build
-          helm package
+          helm package .

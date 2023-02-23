@@ -30,7 +30,7 @@ jobs:
     needs: find-charts
     strategy:
       matrix:
-        chart: ${{ fromJSON(needs.find-charts.outputs.changed-charts) }}
+        chart: ${{ fromJSON(needs.find-charts.outputs.changed-charts || "[]") }}
 
     steps:
       - name: Checkout PR

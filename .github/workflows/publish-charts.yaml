@@ -41,6 +41,7 @@ jobs:
   publish-chart:
     runs-on: ubuntu-latest
     needs: find-charts
+    if: needs.find-charts.outputs.changed-charts != '[]'
     strategy:
       matrix:
         chart: ${{ fromJSON(needs.find-charts.outputs.changed-charts) }}

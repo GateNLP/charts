@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # Host name under which the app will be exposed by the ingress
-hostName: "example.gate.ac.uk"
+hostName: "teamware.example.com"
 
 # Public base URL of the app - by default https://{hostName} but may need to be
 # overridden if your ingress is not tls-enabled or if it is listening on a port
@@ -25,8 +25,7 @@ superuser:
 
 # Docker registry prefix from which the backend and staticFiles images will be
 # pulled - if specified, this value _must_ end with a forward slash, e.g.
-# imageRegistry: "ghcr.io/gatenlp/"
-imageRegistry: ""
+imageRegistry: "ghcr.io/gatenlp/"
 
 migrations:
   # Whether to run a job at chart install time to perform the Django migrations -
@@ -73,6 +72,12 @@ backend:
     type: ClusterIP
     # Port number for the backend service
     port: 80
+    # Fixed NodePort if publishing as a NodePort service
+    nodePort: ""
+    # Additional annotations to add to the service (e.g. for a load balancer or
+    # service mesh)
+    annotations: {}
+
   # Kubernetes resource specification (limits/requests for cpu/memory) for
   # the backend container.
   resources: {}
@@ -176,6 +181,12 @@ staticFiles:
     type: ClusterIP
     # Port number for the static files service
     port: 80
+    # Fixed NodePort if publishing as a NodePort service
+    nodePort: ""
+    # Additional annotations to add to the service (e.g. for a load balancer or
+    # service mesh)
+    annotations: {}
+
   # Kubernetes resource specification (limits/requests for cpu/memory) for
   # the static files container.
   resources: {}
@@ -250,6 +261,14 @@ serviceAccount:
 
 
 ingress:
+  # Should we create an ingress to route requests in to Teamware?  If you set this
+  # to false then it is your responsibility to set up appropriate routing, so that
+  # {publicUrl}/static/* goes to the "static" service and all other requests to
+  # {publicUrl} go to the backend service.  Typically this will be done either by
+  # deploying another reverse proxy deployment as a LoadBalancer service, or by
+  # setting the service type of both the static and backend services to NodePort
+  # and using a separate gateway external to the cluster.
+  enabled: true
   # Ingress class name.  If unset the cluster must have a default ingress class.
   className: ""
   # Annotations to add to the ingress, e.g. to instruct cert-manager to issue a
@@ -304,7 +323,6 @@ postgresql:
   auth:
     database: teamware_db
     username: gate
-    existingSecret: postgres-credentials
 
   # Additional useful settings include persistence.storageClass and persistence.size
 

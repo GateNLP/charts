@@ -63,7 +63,7 @@ jobs:
           helm dependency build
 
           # Build the tgz package
-          helm package
+          helm package .
 
           # Upload it to GATE repo
           curl -u '${{ secrets.GATE_REPO_USERNAME }}:${{ secrets.GATE_REPO_PASSWORD }}' https://repo.gate.ac.uk/repository/charts/ --upload-file ${{ matrix.chart }}-*.tgz

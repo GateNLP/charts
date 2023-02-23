@@ -1,6 +1,6 @@
 apiVersion: v2
 name: gate-teamware
-description: A Helm chart for Kubernetes
+description: A web application for collaborative document annotation.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -15,7 +15,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.2.1
+version: 0.2.2
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -26,4 +26,4 @@ appVersion: "0.3.1"
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 11.1.28 # chart version 11.1.28 wraps Postgresql version 14
+  version: 11.x # chart version 11.x wraps Postgresql version 14.x

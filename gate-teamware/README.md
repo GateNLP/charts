@@ -57,12 +57,12 @@ Things you will commonly need to override include:
   - `replicaCount` (default 1) - the number of replicas of the Django container to run.  Alternatively you can set `backend.autoscaling.enabled` to `true` for auto-scaling based on CPU usage
 - `staticFiles`
   - `replicaCount` (default 1) - the same for the static files nginx, though this is highly unlikely to need more than one replica as it's a simple static file server
-- `privacyPolicy` - contact details of the service's host and administrator to be rendered in the privacy policy and terms & conditions.
+- `privacyPolicy` - settings related to the privacy policy and terms & conditions.
   - `host` - the organisation or individual responsible for managing the deployment of the teamware instance.
     - `name` - host organisation/individual's name.
     - `address` - physical address.
     - `contact` - a means of contact, supports HTML for e.g. email or contact form links.
-  - `admin` - the individual or organisation responsible for managing users of the teamware instance.
+  - `admin` - the individual or organisation responsible for managing users of the teamware instance, if this is not the same as the `host`.  Any of these values that are left un-set will default to the corresponding `host` value.
     - `name` - admin organisation/individual's name.
     - `address` - physical address.
     - `contact` - a means of contact, supports HTML for e.g. email or contact form links.

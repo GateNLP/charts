@@ -136,6 +136,19 @@ spec:
             {{- toYaml . | nindent 10 }}
           {{- end }}
           {{- if and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret }}
+          # Privacy Policy Settings
+          - name: PP_HOST_NAME
+            value: {{ $.Values.privacyPolicy.host.name | quote }}
+          - name: PP_HOST_ADDRESS
+            value: {{ $.Values.privacyPolicy.host.address | quote }}
+          - name: PP_HOST_CONTACT
+            value: {{ $.Values.privacyPolicy.host.contact | quote }}
+          - name: PP_ADMIN_NAME
+            value: {{ $.Values.privacyPolicy.admin.name | quote }}
+          - name: PP_ADMIN_ADDRESS
+            value: {{ $.Values.privacyPolicy.admin.address | quote }}
+          - name: PP_ADMIN_CONTACT
+            value: {{ $.Values.privacyPolicy.admin.contact | quote }}
           volumeMounts:
           - name: email-client-cert
             mountPath: /email-client-cert

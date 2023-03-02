@@ -316,6 +316,20 @@ email:
     # client secret and "refresh-token" for the GMail API refresh token.
     secretName: ""
 
+privacyPolicy:
+  # Contact details of the host and administrator of the teamware instance
+  host:
+    # Name of the host
+    name: ""
+    # Host's physical address
+    address: ""
+    # A method of contacting the host, field supports HTML for e.g. linking to a form
+    contact: ""
+  admin:
+    name: ""
+    address: ""
+    contact: ""
+
 # Database settings - see the bitnami postgresql chart documentation for full
 # details
 postgresql:

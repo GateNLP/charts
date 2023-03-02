@@ -134,6 +134,13 @@ and the deployments may need to be manually updated using `kubectl rollout resta
 
 ## Changelog
 
+### Version 0.2.3
+
+No breaking changes.
+
+Minor changes:
+- `privacyPolicy` key added containing `host` and `admin`, each containing `name`, `address` and `contact` fields to hold contact details for the app's privacy policy and terms & conditions.
+
 ### Version 0.2.1
 
 **Breaking changes**

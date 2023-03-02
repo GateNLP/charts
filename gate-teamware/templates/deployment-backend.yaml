@@ -132,24 +132,39 @@ spec:
                 key: refresh-token
           {{- end }}{{/* if backend gmail */}}
           {{- end }}{{/* with .Values.email */}}
+
           {{- with $.Values.privacyPolicy }}
           # Privacy Policy Settings
+          {{- with .host.name }}
           - name: PP_HOST_NAME
-            value: {{ .host.name | quote }}
-          - name: PP_HOST_ADDRESS
-            value: {{ .host.address | quote }}
-          - name: PP_HOST_CONTACT
-            value: {{ .host.contact | quote }}
-          - name: PP_ADMIN_NAME
-            value: {{ .admin.name | quote }}
-          - name: PP_ADMIN_ADDRESS
-            value: {{ .admin.address | quote }}
-          - name: PP_ADMIN_CONTACT
-            value: {{ .admin.contact | quote }}
+            value: {{ . | quote }}
           {{- end }}
+          {{- with .host.address }}
+          - name: PP_HOST_ADDRESS
+            value: {{ . | quote }}
+          {{- end }}
+          {{- with .host.contact }}
+          - name: PP_HOST_CONTACT
+            value: {{ . | quote }}
+          {{- end }}
+          {{- with .admin.name }}
+          - name: PP_ADMIN_NAME
+            value: {{ . | quote }}
+          {{- end }}
+          {{- with .admin.address }}
+          - name: PP_ADMIN_ADDRESS
+            value: {{ . | quote }}
+          {{- end }}
+          {{- with .admin.contact }}
+          - name: PP_ADMIN_CONTACT
+            value: {{ . | quote }}
+          {{- end }}{{/* with .admin.contact */}}
+          {{- end }}{{/* with $.Values.privacyPolicy */}}
+
           {{- with .extraEnv }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
+
           {{- if and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret }}
           volumeMounts:
           - name: email-client-cert

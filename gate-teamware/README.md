@@ -134,7 +134,7 @@ and the deployments may need to be manually updated using `kubectl rollout resta
 
 ## Changelog
 
-### Version 0.2.3
+### Version 0.2.4
 
 No breaking changes.
 

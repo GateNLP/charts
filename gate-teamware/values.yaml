@@ -317,6 +317,9 @@ email:
     secretName: ""
 
 privacyPolicy:
+  # name of a pre-existing ConfigMap containing entries for a custom privacy-policy.md
+  # and/or terms-and-conditions.md, which will override the default ones provided by Teamware
+  customPoliciesConfigMap: ""
   # Contact details of the host and administrator of the teamware instance
   host:
     # Name of the organization that hosts this teamware instance, e.g. "Annotation4U Ltd."

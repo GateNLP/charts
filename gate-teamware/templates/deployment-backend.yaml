@@ -165,12 +165,19 @@ spec:
             {{- toYaml . | nindent 10 }}
           {{- end }}
 
-          {{- if and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret }}
+          {{- if or (and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret) $.Values.privacyPolicy.customPoliciesConfigMap }}
           volumeMounts:
+          {{- end }}
+          {{- if and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret }}
           - name: email-client-cert
             mountPath: /email-client-cert
             readOnly: true
           {{- end }}{{/* if smtp client cert */}}
+          {{- if $.Values.privacyPolicy.customPoliciesConfigMap }}
+          - name: custom-policies
+            mountPath: /app/custom-policies
+            readOnly: true
+          {{- end }}{{/* if custom policies */}}
           livenessProbe:
             httpGet:
               path: /
@@ -187,12 +194,20 @@ spec:
                 value: {{ $.Values.hostName | quote }}
           resources:
             {{- toYaml .resources | nindent 12 }}
-      {{- if and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret }}
+
+      {{- if or (and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret) $.Values.privacyPolicy.customPoliciesConfigMap }}
       volumes:
+      {{- end }}
+      {{- if and $.Values.email.smtp.security $.Values.email.smtp.clientCertSecret }}
       - name: email-client-cert
         secret:
           secretName: {{ $.Values.email.smtp.clientCertSecret | quote }}
       {{- end }}{{/* if smtp client cert */}}
+      {{- if $.Values.privacyPolicy.customPoliciesConfigMap }}
+        - name: custom-policies
+          configMap:
+            name: {{ $.Values.privacyPolicy.customPoliciesConfigMap }}
+      {{- end }}{{/* if custom policies */}}
       {{- with .nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

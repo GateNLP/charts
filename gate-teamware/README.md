@@ -66,6 +66,7 @@ Things you will commonly need to override include:
     - `name` - admin organisation/individual's name.
     - `address` - physical address.
     - `contact` - a means of contact, supports HTML for e.g. email or contact form links.
+  - `customPoliciesConfigMap` - if any of the default policies are not suitable for your needs or not compatible with the law governing your location, then you will need to [provide your own custom policies](https://gatenlp.github.io/gate-teamware/development/developerguide/#including-a-custom-privacy-policy-and-or-terms-conditions) as Markdown files.  Create a ConfigMap with entries named `privacy-policy.md` and/or `terms-and-conditions.md` (whichever of the standard policies you want to override), provide the name of the ConfigMap in this setting, and Teamware will use your custom policy or policies in place of the standard ones.
 
 You can also set `resources`, `nodeSelector`, `affinity` and/or `tolerations` if required, under both the `backend` and `staticFiles` sections
 

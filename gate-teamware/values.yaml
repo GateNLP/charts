@@ -316,6 +316,32 @@ email:
     # client secret and "refresh-token" for the GMail API refresh token.
     secretName: ""
 
+privacyPolicy:
+  # name of a pre-existing ConfigMap containing entries for a custom privacy-policy.md
+  # and/or terms-and-conditions.md, which will override the default ones provided by Teamware
+  customPoliciesConfigMap: ""
+  # Contact details of the host and administrator of the teamware instance
+  host:
+    # Name of the organization that hosts this teamware instance, e.g. "Annotation4U Ltd."
+    name: ""
+    # Host's physical address (e.g. 123 Somewhere Street, London, SW1A 1AA, UK)
+    address: ""
+    # A method of contacting the host, field supports HTML (inline elements such as
+    # <a> or <span> only), e.g.
+    #
+    # contact: |
+    #   <a href="https://annotation4u.com/contact" target="_blank">Contact Annotation4U</a>
+    contact: ""
+  admin:
+    # Name of the organization that is responsible for administering this
+    # teamware instance, if not the same as the host
+    name: ""
+    # Administrator's physical address, if not the same as the host
+    address: ""
+    # A method of contacting the administrator, if not the same as the host.  This
+    # field supports HTML.
+    contact: ""
+
 # Database settings - see the bitnami postgresql chart documentation for full
 # details
 postgresql:

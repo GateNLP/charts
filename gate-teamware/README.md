@@ -39,6 +39,7 @@ Things you will commonly need to override include:
     - `secret` - name of the secret holding the TLS certificate for the configured `hostName`.  Whether this is required or optional depends on the cluster and its configured ingress controller, e.g. the GATE cluster is set up to use a `*.gate.ac.uk` wildcard certificate for ingresses that do not specify their own, so on that cluster if the `hostName` matches that wildcard then a separate secret is not required.
   - `enabled` - using the ingress is the simplest way to expose the Teamware application correctly, but if you are unable to install an ingress controller in your cluster you can set this property to `false` and establish an alternative way to expose the Teamware services at the correct URLs - this could be a separate reverse proxy deployed manually into your cluster as a `LoadBalancer` service, or by making the `backend` and `staticFiles` services be type `NodePort` and replicating the ingress rules at an external gateway of some kind.  All requests to the `publicUrl` need to go to the backend service, _except_ those where the path prefix is `/static` which should go to the static service instead.
 - `email` settings to be able to send registration and password reminder emails
+  - `activationEnabled` (default `false`) - do we require new accounts to verify their email addresses before use by way of an emailed verification code?
   - `adminAddress` - email address of the administrator, used as the "from" address on generated emails
   - `backend` - "smtp" to send mail via an SMTP server, "gmail" to use the GMail API.
   - for the "smtp" backend:
@@ -57,6 +58,16 @@ Things you will commonly need to override include:
   - `replicaCount` (default 1) - the number of replicas of the Django container to run.  Alternatively you can set `backend.autoscaling.enabled` to `true` for auto-scaling based on CPU usage
 - `staticFiles`
   - `replicaCount` (default 1) - the same for the static files nginx, though this is highly unlikely to need more than one replica as it's a simple static file server
+- `privacyPolicy` - settings related to the privacy policy and terms & conditions.
+  - `host` - the organisation or individual responsible for managing the deployment of the teamware instance.
+    - `name` - host organisation/individual's name.
+    - `address` - physical address.
+    - `contact` - a means of contact, supports HTML for e.g. email or contact form links.
+  - `admin` - the individual or organisation responsible for managing users of the teamware instance, if this is not the same as the `host`.  Any of these values that are left un-set will default to the corresponding `host` value.
+    - `name` - admin organisation/individual's name.
+    - `address` - physical address.
+    - `contact` - a means of contact, supports HTML for e.g. email or contact form links.
+  - `customPoliciesConfigMap` - if any of the default policies are not suitable for your needs or not compatible with the law governing your location, then you will need to [provide your own custom policies](https://gatenlp.github.io/gate-teamware/development/developerguide/#including-a-custom-privacy-policy-and-or-terms-conditions) as Markdown files.  Create a ConfigMap with entries named `privacy-policy.md` and/or `terms-and-conditions.md` (whichever of the standard policies you want to override), provide the name of the ConfigMap in this setting, and Teamware will use your custom policy or policies in place of the standard ones.
 
 You can also set `resources`, `nodeSelector`, `affinity` and/or `tolerations` if required, under both the `backend` and `staticFiles` sections
 
@@ -133,6 +144,13 @@ staticFiles:
 and the deployments may need to be manually updated using `kubectl rollout restart`.
 
 ## Changelog
+
+### Version 0.2.4
+
+No breaking changes.
+
+Minor changes:
+- `privacyPolicy` key added containing `host` and `admin`, each containing `name`, `address` and `contact` fields to hold contact details for the app's privacy policy and terms & conditions.
 
 ### Version 0.2.1
 

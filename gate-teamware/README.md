@@ -51,7 +51,7 @@ Things you will commonly need to override include:
     - `clientId` - the OAuth client ID for the GMail API
     - `secretName` - Kubernetes secret containing entries for "client-secret" (the OAuth client secret) and "refresh-token" (the authenticated refresh token)
 - `migrations`
-  - `run` - set this to `true` in order to run the Django database migrations after the chart is installed.  The backend pods _do not_ run migrations at startup, as this is unsafe if there are multiple replicas or if autoscaling is in use, what this setting does is to run a one-off `Job` that just does the migrations and then exits.
+  - `run` - if this is `true` (the default) then the cluster will run the Django database migrations after the chart is installed.  The backend pods _do not_ run migrations at startup, as this is unsafe if there are multiple replicas or if autoscaling is in use, what this setting does is to run a one-off `Job` that just does the migrations and then exits.  Set to `false` if you do not want to run the migrations job - this is an option for advanced users only, typically only required when recovering from database corruption, and if there _are_ any database schema changes you will need to apply them yourself in another way.
 - `backend`
   - `djangoSecret` - the name of the Kubernetes secret you just created holding the random secret key for Django
   - `extraArgs` / `extraEnv` - additional command line arguments and environment variables to pass to the `gunicorn` process that runs the backend.  `extraArgs` is a list of strings that will be passed through to `gunicorn`, `extraEnv` is in the usual format for environment variables in a pod specification, a list of maps where each map has a `name` and either `value` or `valueFrom`.
@@ -144,6 +144,10 @@ staticFiles:
 and the deployments may need to be manually updated using `kubectl rollout restart`.
 
 ## Changelog
+
+### Version 2.0.0
+
+No breaking changes - this version simply sets the `appVersion` following the release of [GATE Teamware 2.0.0](https://github.com/GateNLP/gate-teamware/releases/tag/v2.0.0).
 
 ### Version 0.2.4
 

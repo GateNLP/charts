@@ -145,6 +145,10 @@ and the deployments may need to be manually updated using `kubectl rollout resta
 
 ## Changelog
 
+### Version 2.1.0
+
+Upgraded `appVersion` to [GATE Teamware 2.1.0](https://github.com/GateNLP/gate-teamware/releases/tag/v2.1.0).
+
 ### Version 2.0.0
 
 No breaking changes - this version simply sets the `appVersion` following the release of [GATE Teamware 2.0.0](https://github.com/GateNLP/gate-teamware/releases/tag/v2.0.0).

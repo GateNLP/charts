@@ -145,6 +145,12 @@ and the deployments may need to be manually updated using `kubectl rollout resta
 
 ## Changelog
 
+### Version 2.1.1
+
+Upgraded `appVersion` to [GATE Teamware 2.1.1](https://github.com/GateNLP/gate-teamware/releases/tag/v2.1.1).
+
+This version introduces support for "conditional" annotation components, that appear or disappear depending on values in the document being annotated and/or other annotation selections in the current document.
+
 ### Version 2.1.0
 
 Upgraded `appVersion` to [GATE Teamware 2.1.0](https://github.com/GateNLP/gate-teamware/releases/tag/v2.1.0).

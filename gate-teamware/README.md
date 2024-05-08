@@ -145,6 +145,12 @@ and the deployments may need to be manually updated using `kubectl rollout resta
 
 ## Changelog
 
+### Version 2.2.0
+
+Upgraded `appVersion` to [GATE Teamware 2.2.0](https://github.com/GateNLP/gate-teamware/releases/tag/v2.2.0).
+
+This version of GATE Teamware changes the format of JSON data exports to place the annotation values immediately under "features" instead of nested inside a "label" wrapper.  Other code that consumes Teamware JSON files may need to be updated to match.
+
 ### Version 2.1.1
 
 Upgraded `appVersion` to [GATE Teamware 2.1.1](https://github.com/GateNLP/gate-teamware/releases/tag/v2.1.1).

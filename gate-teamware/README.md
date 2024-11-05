@@ -145,6 +145,12 @@ and the deployments may need to be manually updated using `kubectl rollout resta
 
 ## Changelog
 
+### Version 2.3.0
+
+Upgraded `appVersion` to [GATE Teamware 2.3.0](https://github.com/GateNLP/gate-teamware/releases/tag/v2.3.0).
+
+This version of GATE Teamware adds the ability to specify individual checkbox and radio button labels in HTML as well as plain text, allowing things like coloured labels, the use of italics or bold, clickable links to a knowledge base URI, etc.
+
 ### Version 2.2.0
 
 Upgraded `appVersion` to [GATE Teamware 2.2.0](https://github.com/GateNLP/gate-teamware/releases/tag/v2.2.0).

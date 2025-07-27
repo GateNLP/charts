@@ -75,6 +75,17 @@ The chart uses [a subchart](https://github.com/bitnami/charts/tree/main/bitnami/
 
 ```yaml
 postgresql:
+  # As of August 2025, the container images on which the postgresql
+  # chart depends are no longer available at their original
+  # location; this setting points the postgresql image at the new
+  # location where it has been archived.  If you have enabled the
+  # options for the metrics exporter and/or volume permissions
+  # init container, then you may need to set additional values for
+  # metrics.image.repository and volumePermissions.image.repository
+  # respectively in order for those components to be found.
+  image:
+    repository: bitnamilegacy/postgresql
+
   primary:
     persistence:
       # Requested size for the persistent volume holding Postgresql data

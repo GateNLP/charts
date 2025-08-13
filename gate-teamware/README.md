@@ -103,7 +103,7 @@ By default the chart uses the publicly available Teamware images published on `g
 
 The images to be run are specified in three parts, the top-level `imageRegistry` key in the values file is the registry prefix (by default `ghcr.io/gatenlp/`) which _must_ end with a slash, then `backend` and `staticFiles` each have `image.repository` for the image name (default "teamware-backend" and "teamware-static" respectively) and `image.tag` for the tag, which defaults to match the chart "appVersion" number, plus `pullPolicy` (default "IfNotPresent") and `pullSecrets` (if you are using a private registry whose credentials are not already configured on the default ServiceAccount for this namespace).  So if you store your images in a private registry but still name them `teamware-backend` and `teamware-static` then the only thing you should need to override is the `imageRegistry`.
 
-The chart also supports running regular backups of the database to S3 (or a compatible storage system), these can be configured using the settings under the `backup` section, see [`values.yaml`](gate-teamware/values.yaml) for more details.
+The chart also supports running regular backups of the database to S3 (or a compatible storage system), Azure Blob Storage, an SFTP server, or any other datastore supported by the [rclone](https://rclone.org) tool, these can be configured using the settings under the `backup` section, see [`values.yaml`](gate-teamware/values.yaml) for more details.
 
 ## Install/upgrade
 
@@ -155,6 +155,12 @@ staticFiles:
 and the deployments may need to be manually updated using `kubectl rollout restart`.
 
 ## Changelog
+
+### Version 2.3.1
+
+Now supports backups to storage providers other than S3 - the backup cronjob has been switched to use the GateNLP [postgresql-backup-rclone](https://github.com/GateNLP/db-backup-rclone) image, which uploads the database backup files using [rclone](https://rclone.org), which supports many other storage providers besides S3, as well as other S3 authentication mechanisms besides just a static access key and secret key pair.
+
+This change is backwards compatible, existing local `values` files should continue to work unchanged with the new method.
 
 ### Version 2.3.0
 

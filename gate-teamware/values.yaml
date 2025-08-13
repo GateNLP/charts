@@ -352,22 +352,37 @@ postgresql:
 
   # Additional useful settings include persistence.storageClass and persistence.size
 
-# Configure regular database backups to S3 (or compatible) storage
+# Configure regular database backups to any rclone-supported storage provider.
 backup:
   # Image for the backup cronjob
-  image: "schickling/postgres-backup-s3:latest"
+  image: "ghcr.io/gatenlp/postgresql-backup-rclone:latest"
   # Pull policy for the backup image
   pullPolicy: Always
-  # API endpoint, if not the public Amazon S3
+  # Backup storage provider.  Default is "s3" for backwards compatibility, but
+  # you can set this value to "custom" and provide your own rclone configuration
+  # in extraEnv, extraVolumes and extraVolumeMounts to use any other provider
+  # supported by rclone.
+  #
+  # See https://github.com/GateNLP/db-backup-rclone for full details.
+  provider: s3
+  # API endpoint, if not the public Amazon S3.  Ignored if provider is not s3.
   endpoint: ""
-  # S3 region e.g. us-east-1
+  # S3 region e.g. us-east-1.  Ignored if provider is not s3.
   region: ""
-  # Bucket to which the backups should be stored
+  # Prefix within the configured rclone remote where the backup files should
+  # be placed - exactly how this is interpreted depends on the configuration,
+  # for S3 the first path segment should be the bucket name.
+  #
+  # If this value is set, bucketName and keyPrefix are ignored.
+  uploadPrefix: ""
+  # Bucket to which the backups should be stored.  Ignored if provider is not
+  # s3, or if uploadPrefix has been configured directly.
   bucketName: ""
-  # common key prefix for all the backups
+  # common key prefix for all the backups.  Ignored if provider is not
+  # s3, or if uploadPrefix has been configured directly.
   keyPrefix: ""
   # Kubernetes secret with keys "access-key-id" and "secret-key" that have
-  # write access to the specified bucket
+  # write access to the specified bucket.  Ignored if provider is not s3
   credentialsSecret: ""
 
   concurrencyPolicy: ""
@@ -377,13 +392,31 @@ backup:
   # Backup schedule.  Keys in the map are the name of the backup schedule
   # (e.g. daily, weekly), values are the cron expression defining the schedule.
   # The actual backup files will be placed at
-  # s3://<bucketName>/<keyPrefix>/<schedule-name>/<database-name>_<timestamp>.sql.gz
+  # store:<uploadPrefix>/<schedule-name>/<database-name>_<timestamp>.sql.gz
   #
   # Note that the cron job creates new backups but does not expire old ones -
   # if you want old backups to expire (or be moved to cheaper storage like
-  # infrequent access or Glacier) then you should configure that at the bucket
-  # level using S3 lifecycle rules.
+  # infrequent access or Glacier) then you should configure that using the
+  # storage provider's own mechanisms, e.g. S3 lifecycle rules.
   schedule: {}
   # daily:   "13 01 * * *"
   # weekly:  "13 02 * * 0"
   # monthly: "13 00 1 * *"
+
+  # extra environment variable settings to be passed to the backup container
+  extraEnv: []
+  # extra command line arguments to be passed to the backup container (and
+  # from there through to the pg_dump command)
+  extraArgs: []
+  # extra volume definitions added to the backup pod, e.g. an rclone
+  # configuration file, private key for authentication to an sftp datastore,
+  # TLS CA certificates, etc. etc.
+  extraVolumes: []
+  # volumeMounts entries to mount the extra volumes into the backup container
+  extraVolumeMounts: []
+
+  # Additional labels to apply to the backup pods
+  podLabels: {}
+  # Annotations to apply to the backup pods
+  podAnnotations: { }
+

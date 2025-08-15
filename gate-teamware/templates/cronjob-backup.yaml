@@ -26,6 +26,13 @@ spec:
             {{- include "gate-teamware.labels" $ | nindent 12 }}
             {{- include "gate-teamware.selectorLabels" $ | nindent 12 }}
             app.kubernetes.io/component: backup-{{ $name }}
+            {{- with $.Values.backup.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $.Values.backup.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
         spec:
           serviceAccountName: {{ include "gate-teamware.serviceAccountName" $ }}
           restartPolicy: Never
@@ -34,41 +41,72 @@ spec:
               image: {{ $.Values.backup.image | quote }}
               imagePullPolicy: {{ $.Values.backup.pullPolicy }}
               env:
-              - name: S3_ACCESS_KEY_ID
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ $.Values.backup.credentialsSecret | required "backup.credentialsSecret is required" | quote }}
-                    key: access-key-id
-              - name: S3_SECRET_ACCESS_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ $.Values.backup.credentialsSecret | required "backup.credentialsSecret is required" | quote }}
-                    key: secret-key
-              - name: S3_BUCKET
-                value: {{ $.Values.backup.bucketName | required "backup.bucketName is required" | quote }}
-              - name: S3_PREFIX
-                value: {{ with $.Values.backup.keyPrefix }}{{ . }}/{{ end }}{{ $name }}
-              {{- if $.Values.backup.endpoint }}
-              - name: S3_ENDPOINT
-                value: {{ $.Values.backup.endpoint | quote }}
-              {{- end }}
-              {{- if $.Values.backup.region }}
-              - name: S3_REGION
-                value: {{ $.Values.backup.region | quote }}
-              {{- end }}
-              - name: POSTGRES_HOST
+              - name: PGHOST
                 value: {{ include "postgresql.primary.fullname" $.Subcharts.postgresql | quote }}
-              - name: POSTGRES_PORT
+              - name: PGPORT
                 value: {{ include "postgresql.service.port" $.Subcharts.postgresql | quote }}
-              - name: POSTGRES_DATABASE
+              - name: BACKUP_DATABASES
                 value: {{ $.Values.postgresql.auth.database | quote }}
-              - name: POSTGRES_USER
+              - name: PGUSER
                 value: {{ $.Values.postgresql.auth.username | quote }}
-              - name: POSTGRES_PASSWORD
+              - name: PGPASSWORD
                 valueFrom:
                   secretKeyRef:
                     name: {{ include "postgresql.secretName" $.Subcharts.postgresql }}
                     key: password
+              {{- if eq $.Values.backup.provider "s3" }}
+              - name: RCLONE_CONFIG_STORE_TYPE
+                value: s3
+              - name: RCLONE_CONFIG_STORE_ENV_AUTH
+                value: "true"
+              - name: RCLONE_S3_NO_CHECK_BUCKET
+                value: "true"
+              # Don't double check uploads after completion - this is necessary if
+              # our credentials are "write-only" (allowing put but not get)
+              - name: RCLONE_S3_NO_HEAD
+                value: "true"
+              # Skip checksum checks, since these are not compatible with S3 server-side encryption
+              - name: RCLONE_IGNORE_CHECKSUM
+                value: "true"
+              {{- if $.Values.backup.credentialsSecret }}
+              - name: AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ $.Values.backup.credentialsSecret | quote }}
+                    key: access-key-id
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ $.Values.backup.credentialsSecret | quote }}
+                    key: secret-key
+              {{- end }}
+              {{- if $.Values.backup.endpoint }}
+              - name: AWS_ENDPOINT_URL_S3
+                value: {{ $.Values.backup.endpoint | quote }}
+              {{- end }}
+              {{- if $.Values.backup.region }}
+              - name: AWS_REGION
+                value: {{ $.Values.backup.region | quote }}
+              {{- end }}
+              {{- end }}
+              - name: UPLOAD_PREFIX
+                value: {{ printf "%s%s" (include "gate-teamware.backupPrefix" $) $name | quote }}
+              {{- with $.Values.backup.extraEnv }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              {{- with $.Values.backup.extraArgs }}
+              args:
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              {{- with $.Values.backup.extraVolumeMounts }}
+              volumeMounts:
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+
+          {{- with $.Values.backup.extraVolumes }}
+          volumes:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
 
 ---
 {{- end }}{{/* range over schedule */}}
